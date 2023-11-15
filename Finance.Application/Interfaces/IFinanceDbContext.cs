@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Finance.Application.Interfaces
 {
-    public interface IFinancialAccountDbContext
+    public interface IFinanceDbContext
     {
         DbSet<FinancialAccount> FinancialAccounts { get; set; }
+
+        DbSet<Client> Clients { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

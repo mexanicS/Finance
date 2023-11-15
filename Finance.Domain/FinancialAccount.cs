@@ -21,7 +21,5 @@ namespace Finance.Domain
         public DateTime? UpdateDate { get; set;}
 
         public string Title { get; set; }
-
-
     }
 }

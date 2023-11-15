@@ -10,16 +10,20 @@ using System.Threading.Tasks;
 
 namespace Finance.Persistence
 {
-    public class FinancesDbContext : DbContext, IFinancialAccountDbContext
+    public class FinanceDbContext : DbContext, IFinanceDbContext
     {
         public DbSet<FinancialAccount> FinancialAccounts { get; set; }
+        public DbSet<Client> Clients { get; set; }
 
-        public FinancesDbContext(DbContextOptions<FinancesDbContext> options)
+        public FinanceDbContext(DbContextOptions<FinanceDbContext> options)
             : base(options){}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new FinanceConfiguration());
+            modelBuilder.ApplyConfiguration(new FinancialAccountConfiguration());
+
+            modelBuilder.ApplyConfiguration(new ClientConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
     }

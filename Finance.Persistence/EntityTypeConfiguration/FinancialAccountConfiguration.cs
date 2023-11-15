@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Finance.Persistence.EntityTypeConfiguration
 {
-    public class FinanceConfiguration : IEntityTypeConfiguration<FinancialAccount>
+    public class FinancialAccountConfiguration : IEntityTypeConfiguration<FinancialAccount>
     {
         public void Configure(EntityTypeBuilder<FinancialAccount> builder)
         {

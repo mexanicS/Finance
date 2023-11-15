@@ -8,7 +8,7 @@ namespace Finance.Persistence
 {
     public class DbInitiliaziation
     {
-        public static void Initilize(FinancesDbContext financesDbContext)
+        public static void Initilize(FinanceDbContext financesDbContext)
         {
             financesDbContext.Database.EnsureCreated();
         }

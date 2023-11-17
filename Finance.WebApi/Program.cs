@@ -1,6 +1,32 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using Finance.Persistence;
 
-app.MapGet("/", () => "Hello World!");
+namespace Finance.WebApi
+{
+    public class Program
+    {
+        public static void Main(string[] args) 
+        { 
+            var host = CreateHostBuilder(args).Build();
 
-app.Run();
+            using (var scope = host.Services.CreateScope())
+            {
+                var serviceProvider = scope.ServiceProvider;
+                try
+                {
+                    var context = serviceProvider.GetRequiredService<FinanceDbContext>();
+                    DbInitiliaziation.Initilize(context);
+                }
+                catch (Exception exception){ }
+            }
+
+            host.Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+        }
+    }
+}
+

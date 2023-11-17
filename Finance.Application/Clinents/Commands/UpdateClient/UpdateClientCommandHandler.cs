@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Finance.Application.Clinents.Commands.UpdateClient
 {
     public class UpdateClientCommandHandler
-            : IRequestHandler<UpdateClientCommand>
+            : IRequestHandler<UpdateClientCommand, Unit>
     {
         private readonly IFinanceDbContext _dbContext;
 
@@ -28,11 +28,6 @@ namespace Finance.Application.Clinents.Commands.UpdateClient
             if (entity == null) { }
 
             return Unit.Value;
-        }
-
-        Task IRequestHandler<UpdateClientCommand>.Handle(UpdateClientCommand request, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
     }
 }

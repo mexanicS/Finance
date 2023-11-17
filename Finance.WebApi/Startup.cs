@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
 using Finance.Application;
+using Finance.Application.Clinents.Queries.GetClientList;
 using Finance.Application.Common.Mappings;
 using Finance.Application.Interfaces;
+using Finance.Domain;
 using Finance.Persistence;
 namespace Finance.WebApi
 {
@@ -16,10 +18,12 @@ namespace Finance.WebApi
             services.AddAutoMapper(config => {
                 config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
                 config.AddProfile(new AssemblyMappingProfile(typeof(FinanceDbContext).Assembly));
+                config.CreateMap<Client, ClientLookupDto>();
             });
 
             services.AddApplication();
             services.AddPersistence(Configuration);
+            services.AddControllers();
 
             services.AddCors(options =>
             {

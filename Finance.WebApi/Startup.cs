@@ -5,6 +5,8 @@ using Finance.Application.Common.Mappings;
 using Finance.Application.Interfaces;
 using Finance.Domain;
 using Finance.Persistence;
+using Notes.WebApi.Middleware;
+
 namespace Finance.WebApi
 {
     public class Startup
@@ -42,6 +44,9 @@ namespace Finance.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+
+            app.UseCustomExceptionHandler();
             app.UseRouting();
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");

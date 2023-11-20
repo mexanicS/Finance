@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using PeoplesCities.Application.Common.Behaviors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +16,8 @@ namespace Finance.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+            //services.AddValidatorsFromAssemblies(new[] { Assembly.GetExecutingAssembly() });
+            //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return services;
         }

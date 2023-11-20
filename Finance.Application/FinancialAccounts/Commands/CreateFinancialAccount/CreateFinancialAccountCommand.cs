@@ -19,7 +19,7 @@ namespace Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount
 
         public DateTime? UpdateDate { get; set; }
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         public CreateFinancialAccountCommand(Guid clientId)
         {

@@ -15,7 +15,7 @@ namespace Finance.Domain
         public string MiddleName { get; set; }
         public string Description { get; set; }
         public DateTime? AddedDate { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
     }
 }

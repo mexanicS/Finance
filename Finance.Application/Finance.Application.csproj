@@ -19,8 +19,4 @@
     <ProjectReference Include="..\Finance.Domain\Finance.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="FinancialAccountBalance\Commands\DeductMoneyToBalanceByClient\" />
-  </ItemGroup>
-
 </Project>

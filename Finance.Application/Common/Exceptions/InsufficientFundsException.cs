@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Finance.Application.Common.Exceptions
 {
-    public class NotFoundException : Exception
+    public class InsufficientFundsException : Exception
     {
-        public NotFoundException(string name, object key)  : base($"Entity \"{name}\" ({key}) not found.") { }
-
+        public InsufficientFundsException() : base("Insufficient funds to complete the transaction") { }
     }
 }

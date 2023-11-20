@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Finance.Application.Clinents.Commands.CreateClient
 {
-    public class DeleteClientCommandValidator : AbstractValidator<CreateClientCommand>
+    public class CreateClientCommandValidator : AbstractValidator<CreateClientCommand>
     {
-        public DeleteClientCommandValidator() 
+        public CreateClientCommandValidator() 
         {
             RuleFor(createClientCommand => createClientCommand.FirstName)
                 .NotEmpty()

@@ -40,9 +40,7 @@ namespace Finance.Application.Clinents.Commands.CreateClient
             await _dbContext.Clients.AddAsync(client, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            //await _createFinancialAccountCommandsHandler.CreateFinancialAccountBeforeClient(client.Id, cancellationToken);
-
-            await _mediator.Send(new CreateFinancialAccountCommand(client.Id));
+            await _mediator.Send(new CreateFinancialAccountCommand(client.Id), cancellationToken);
 
             return client.Id;
 

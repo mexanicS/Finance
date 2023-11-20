@@ -22,7 +22,7 @@ namespace Finance.WebApi.Controllers
         [HttpGet("{clientId}")]
         public async Task<ActionResult<FinancialAccount>> GetFinancialAccountByClient(Guid clientId)
         {
-            var query = new GetFiancialAccountByClientQuery
+            var query = new GetFiancialAccountByClientQuery()
             {
                 ClientId = clientId
             };

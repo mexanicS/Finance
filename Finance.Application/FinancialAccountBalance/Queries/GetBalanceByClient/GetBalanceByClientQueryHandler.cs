@@ -13,16 +13,16 @@ using System.Threading.Tasks;
 
 namespace Finance.Application.FinancialAccounts.Queries.GetFinancialAccount
 {
-    public class GetFinancialAccountByClientQueryHandler : IRequestHandler<GetFiancialAccountByClientQuery, FinancialAccount>
+    public class GetBalanceByClientQueryHandler : IRequestHandler<GetBalanceByClientQuery, FinancialAccount>
     {
         private readonly IFinanceDbContext _dbContext;
 
-        public GetFinancialAccountByClientQueryHandler(IFinanceDbContext dbContext)
+        public GetBalanceByClientQueryHandler(IFinanceDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<FinancialAccount> Handle (GetFiancialAccountByClientQuery request, CancellationToken cancellationToken)
+        public async Task<FinancialAccount> Handle (GetBalanceByClientQuery request, CancellationToken cancellationToken)
         {
             var entity = await _dbContext.FinancialAccounts.FirstOrDefaultAsync(financialAccounts => financialAccounts.ClientId == request.ClientId, cancellationToken);
 

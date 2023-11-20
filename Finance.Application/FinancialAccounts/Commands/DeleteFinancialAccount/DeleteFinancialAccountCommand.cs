@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Finance.Application.Clinents.Commands.DeleteFinancialAccount
+namespace Finance.Application.FinancialAccounts.Commands.DeleteFinancialAccount
 {
     public class DeleteFinancialAccountCommand : IRequest<Unit>
     {

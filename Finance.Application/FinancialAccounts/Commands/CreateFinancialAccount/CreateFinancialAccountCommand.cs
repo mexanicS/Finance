@@ -5,13 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace Finance.Application.Clinents.Commands.CreateFinancialAccount
+namespace Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount
 {
     public class CreateFinancialAccountCommand : IRequest<Guid>
     {
         public Guid Id { get; set; }
 
-        public string ClientId { get; set; }
+        public Guid ClientId { get; set; }
 
         public decimal? Balance { get; set; } = null;
 
@@ -20,5 +20,10 @@ namespace Finance.Application.Clinents.Commands.CreateFinancialAccount
         public DateTime? UpdateDate { get; set; }
 
         public string Title { get; set; }
+
+        public CreateFinancialAccountCommand(Guid clientId)
+        {
+            ClientId = clientId;
+        }
     }
 }

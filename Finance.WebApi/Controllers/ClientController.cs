@@ -2,7 +2,9 @@
 using Finance.Application.Clinents.Commands.CreateClient;
 using Finance.Application.Clinents.Commands.DeleteClient;
 using Finance.Application.Clinents.Commands.UpdateClient;
+using Finance.Application.Clinents.Queries.GetClientDetails;
 using Finance.Application.Clinents.Queries.GetClientList;
+using Finance.Domain;
 using Finance.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +20,7 @@ namespace Finance.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ClientListVm>> Get()
+        public async Task<ActionResult<ClientListVm>> GetAll()
         {
             var query = new GetClientListQuery
             {
@@ -31,6 +33,18 @@ namespace Finance.WebApi.Controllers
         }
 
         //Получени инцы клиента по айди!
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Client>> Get(Guid id)
+        {
+            var query = new GetClientDetailsQuery
+            {
+                UserId = UserId,
+                Id = id
+            };
+
+            var vm = await Mediator.Send(query);
+            return Ok(vm);
+        }
 
         [HttpPost]
         public async Task<ActionResult<Guid>> Create([FromBody] CreateClientDto createClientDto) 
@@ -46,7 +60,7 @@ namespace Finance.WebApi.Controllers
         {
             var command = _mapper.Map<UpdateClientCommand>(updateClientDto);
             command.UserId = UserId;
-            var clientId = await Mediator.Send(command);
+            await Mediator.Send(command);
             return NoContent();
         }
 

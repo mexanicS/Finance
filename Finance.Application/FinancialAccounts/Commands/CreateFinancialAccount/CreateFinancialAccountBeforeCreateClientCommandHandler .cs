@@ -1,23 +1,19 @@
-﻿using Finance.Application.Clinents.Commands.CreateFinancialAccount;
-using Finance.Application.Interfaces;
+﻿using Finance.Application.Interfaces;
 using Finance.Domain;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-
-namespace Finance.Application.Clinents.Commands.CreateFinancialAccount
+namespace Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount
 {
-    public class CreateFinancialAccountCommandsHandler
-        : IRequestHandler<CreateFinancialAccountCommand,Guid>
+    public class CreateFinancialAccountBeforeCreateClientCommandHandler : IRequestHandler<CreateFinancialAccountCommand, Guid>
     {
-        private readonly IFinanceDbContext  _dbContext;
+        private readonly IFinanceDbContext _dbContext;
 
-        public CreateFinancialAccountCommandsHandler(IFinanceDbContext dbContext)
+        public CreateFinancialAccountBeforeCreateClientCommandHandler(IFinanceDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -27,18 +23,15 @@ namespace Finance.Application.Clinents.Commands.CreateFinancialAccount
             var financialAccount = new FinancialAccount()
             {
                 Id = Guid.NewGuid(),
-                Balance = request.Balance,
                 ClientId = request.ClientId,
                 CreateDate = DateTime.UtcNow,
-                Title = request.Title,
-                UpdateDate = null,
+                Title = "Создано автоматически при создании клиента"
             };
 
             await _dbContext.FinancialAccounts.AddAsync(financialAccount, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return financialAccount.Id;
-
         }
     }
 }

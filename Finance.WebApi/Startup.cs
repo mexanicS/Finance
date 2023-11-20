@@ -1,10 +1,14 @@
 ﻿using System.Reflection;
 using Finance.Application;
+using Finance.Application.Clinents.Commands.CreateClient;
 using Finance.Application.Clinents.Queries.GetClientList;
 using Finance.Application.Common.Mappings;
+using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
 using Finance.Application.Interfaces;
 using Finance.Domain;
 using Finance.Persistence;
+using Finance.WebApi.Models;
+using MediatR;
 using Notes.WebApi.Middleware;
 
 namespace Finance.WebApi
@@ -21,6 +25,7 @@ namespace Finance.WebApi
                 config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
                 config.AddProfile(new AssemblyMappingProfile(typeof(FinanceDbContext).Assembly));
                 config.CreateMap<Client, ClientLookupDto>();
+                config.CreateMap<CreateClientDto, CreateClientCommand>();
             });
 
             services.AddApplication();
@@ -36,6 +41,7 @@ namespace Finance.WebApi
                     policy.AllowAnyOrigin();
                 });
             });
+            services.AddSwaggerGen();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -44,6 +50,13 @@ namespace Finance.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(config => {
+                config.RoutePrefix = string.Empty;
+                config.SwaggerEndpoint("swagger/v1/swagger.json", "Finance API");
+            });
+
 
 
             app.UseCustomExceptionHandler();

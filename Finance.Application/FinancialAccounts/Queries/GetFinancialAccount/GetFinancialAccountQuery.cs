@@ -1,15 +1,15 @@
-﻿using System;
+﻿using MediatR;
+using Finance.Domain;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Finance.Domain
+namespace Finance.Application.FinancialAccounts.Queries.GetFinancialAccount
 {
-    public class FinancialAccount
+    public class GetFinancialAccountQuery : IRequest<FinancialAccount>
     {
-        [Key]
         public Guid Id { get; set; }
 
         public Guid ClientId { get; set; }
@@ -18,8 +18,9 @@ namespace Finance.Domain
 
         public DateTime? CreateDate { get; set; }
 
-        public DateTime? UpdateDate { get; set;} = null;
+        public DateTime? UpdateDate { get; set; }
 
-        public string? Title { get; set; }
+        public string Title { get; set; }
+
     }
 }

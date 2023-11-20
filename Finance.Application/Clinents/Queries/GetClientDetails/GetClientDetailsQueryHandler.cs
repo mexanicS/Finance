@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace Finance.Application.Clinents.Queries.GetClientDetails
 {
-    public class GetClientDetailsQueryHandler :IRequestHandler<GetClientDetailsQuery, Client>
+    public class GetFinancialAccountQueryHandler :IRequestHandler<GetClientDetailsQuery, Client>
     {
         private readonly IFinanceDbContext _dbContext;
 
-        public GetClientDetailsQueryHandler(IFinanceDbContext dbContext)
+        public GetFinancialAccountQueryHandler(IFinanceDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -28,7 +28,6 @@ namespace Finance.Application.Clinents.Queries.GetClientDetails
             {
                 throw new NotFoundException(nameof(Client), request.Id);
             }
-
 
             return entity;
         }

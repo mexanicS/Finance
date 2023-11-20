@@ -1,4 +1,5 @@
-﻿using Finance.Application.Interfaces;
+﻿using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
+using Finance.Application.Interfaces;
 using Finance.Domain;
 using MediatR;
 using System;
@@ -15,10 +16,11 @@ namespace Finance.Application.Clinents.Commands.CreateClient
         : IRequestHandler<CreateClientCommand,Guid>
     {
         private readonly IFinanceDbContext  _dbContext;
-
-        public CreateClientCommandsHandler(IFinanceDbContext dbContext)
+        private readonly IMediator _mediator;
+        public CreateClientCommandsHandler(IFinanceDbContext dbContext, IMediator mediator)
         {
             _dbContext = dbContext;
+            _mediator = mediator;
         }
 
         public async Task<Guid> Handle(CreateClientCommand request, CancellationToken cancellationToken)
@@ -37,6 +39,10 @@ namespace Finance.Application.Clinents.Commands.CreateClient
 
             await _dbContext.Clients.AddAsync(client, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            //await _createFinancialAccountCommandsHandler.CreateFinancialAccountBeforeClient(client.Id, cancellationToken);
+
+            await _mediator.Send(new CreateFinancialAccountCommand(client.Id));
 
             return client.Id;
 

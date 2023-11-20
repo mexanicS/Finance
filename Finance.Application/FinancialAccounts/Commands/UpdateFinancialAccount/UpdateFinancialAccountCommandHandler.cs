@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Finance.Application.Clinents.Commands.UpdateFinancialAccount
+namespace Finance.Application.FinancialAccounts.Commands.UpdateFinancialAccount
 {
     public class UpdateFinancialAccountCommandHandler
             : IRequestHandler<UpdateFinancialAccountCommand, Unit>

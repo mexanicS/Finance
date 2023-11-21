@@ -28,7 +28,7 @@ namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalance
 
             if (financialAccount == null)
             {
-                throw new NotFoundException(nameof(Client), request.ClientId);
+                throw new NotFoundException(nameof(FinancialAccount), request.ClientId);
             }
             
             financialAccount.Balance += request.Balance;

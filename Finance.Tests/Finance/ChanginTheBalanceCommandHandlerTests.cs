@@ -4,6 +4,7 @@ using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByCl
 using Finance.Application.FinancialAccountBalance.Commands.DeductMoneyToBalanceByClient;
 using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
 using Finance.Domain;
+using Finance.Persistence;
 using Finance.Tests.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -22,70 +23,50 @@ namespace Finance.Tests.Finance
         [Fact]
         public async Task CreateClientCommandHandler_Success()
         {
-            // Подготовка к тесту - регистрация 50 пользователей
+            //Arrange
+            int maxDegreeOfParallelism = 10;
+
+            //регистрация 50 пользователей
             var registeredUsers = await RegisterUsers(50);
-
             var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(Context);
-
-            foreach (var registeredUser in registeredUsers) 
-            {
-                await handlerAddFinancialAccount.Handle(
-                        new CreateFinancialAccountCommand (registeredUser){},
-                        CancellationToken.None);
-            }
-
-
-
-            // Создание коллекции задач для распараллеливания начисления/списания
-            var tasks = new List<Task>();
-
             var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(Context);
             var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(Context);
 
-            for (int i = 0; i < 10; i++)
+            //Act
+            foreach (var registeredUser in registeredUsers)
             {
-                var threadIndex = i;
-                var task = Task.Run(async () =>
-                {
-                    var clients = Context.Clients.ToList();
-                    
-                    var clientsToProcess = clients.Skip(threadIndex * 5).Take(5);
-                    foreach (var client in clientsToProcess) 
-                    {
-                        await handlerAddMoney.Handle(
-                        new AddMoneyToFinancialAccountCommand
-                        {
-                            Balance = 15,
-                            ClientId = client.Id
-                        },
+                await handlerAddFinancialAccount.Handle(
+                        new CreateFinancialAccountCommand(registeredUser),
                         CancellationToken.None);
-
-                        await handlerDeductMoney.Handle(
-                        new DeductMoneyToFinancialAccountCommand
-                        {
-                            Balance = 7,
-                            ClientId = client.Id
-                        },
-                        CancellationToken.None);
-                    }
-
-                    
-                    // Логика начисления/списания для зарегистрированных пользователей
-                    // Используйте registeredUsers[userIndex] для доступа к соответствующему пользователю
-                    // Выполните начисление/списание для пользователя в этом потоке
-                });
-
-                tasks.Add(task);
             }
-            // Дождитесь завершения всех задач
+
+            var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
+
+            var tasks = registeredUsers.Select(async client =>
+            {
+                await semaphore.WaitAsync();
+                try
+                {
+                    await handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
+                    { Balance = 15, ClientId = client }, CancellationToken.None);
+
+                    await handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
+                    { Balance = 7, ClientId = client }, CancellationToken.None);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }).ToArray();
+
             await Task.WhenAll(tasks);
 
-            // Проверка балансов всех пользователей
+            //Assert
             foreach (var clientId in registeredUsers)
             {
                 Assert.NotNull(
                 await Context.FinancialAccounts.FirstOrDefaultAsync(financialAccounts =>
-                    financialAccounts.ClientId == clientId && financialAccounts.Balance == 3));
+                    financialAccounts.ClientId == clientId && financialAccounts.Balance == 8));
             }
         }
 

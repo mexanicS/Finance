@@ -1,6 +1,8 @@
 ﻿using Finance.Domain;
 using Finance.Persistence;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +16,7 @@ namespace Finance.Tests.Common
         public static Guid UserAId = Guid.NewGuid();
         public static Guid UserBId = Guid.NewGuid();
 
-        public static Guid NoteIdForDelete = Guid.NewGuid();
-        public static Guid NoteIdForUpdate = Guid.NewGuid();
-
-        public static FinanceDbContext Create()
+        public FinanceDbContext CreateContext()
         {
             var options = new DbContextOptionsBuilder<FinanceDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -36,20 +35,10 @@ namespace Finance.Tests.Common
                     UserId = UserAId,
                     MiddleName = "asd",
                     DateOfBirth = null
-                },
-                new Client
-                {
-                    AddedDate = DateTime.Today,
-                    Description = "Details2",
-                    FirstName = "asdasdsad",
-                    Id = Guid.Parse("11BB65BB-FD89-4AFA-8A28-2616F675B825"),
-                    LastName = "Title2",
-                    UserId = UserAId,
-                    MiddleName = "qwe",
-                    DateOfBirth = null
                 });
+
             context.SaveChanges();
-            return context;
+            return new FinanceDbContext(options);
         }
 
         public static void Destroy(FinanceDbContext context)

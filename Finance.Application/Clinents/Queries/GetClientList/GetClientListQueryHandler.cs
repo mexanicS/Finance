@@ -27,7 +27,6 @@ namespace Finance.Application.Clinents.Queries.GetClientList
         public async Task<ClientListVm> Handle(GetClientListQuery request, CancellationToken cancellationToken)
         {
             var clientQuery = await _dbContext.Clients
-                .Where(client=>client.Id == request.Id)
                 .ProjectTo<ClientLookupDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
 

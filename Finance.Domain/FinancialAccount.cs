@@ -14,7 +14,7 @@ namespace Finance.Domain
 
         public Guid ClientId { get; set; }
 
-        public decimal? Balance { get; set; } = null;
+        public decimal? Balance { get; set; } = 0;
 
         public DateTime? CreateDate { get; set; }
 

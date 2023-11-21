@@ -19,7 +19,7 @@ namespace Finance.WebApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet("/GetAllClients")]
         public async Task<ActionResult<ClientListVm>> GetAll()
         {
             var query = new GetClientListQuery
@@ -32,8 +32,7 @@ namespace Finance.WebApi.Controllers
             return Ok(vm);
         }
 
-        //Получени инцы клиента по айди!
-        [HttpGet("{id}")]
+        [HttpGet("{id}/GetClientDetails")]
         public async Task<ActionResult<Client>> Get(Guid id)
         {
             var query = new GetClientDetailsQuery
@@ -46,8 +45,8 @@ namespace Finance.WebApi.Controllers
             return Ok(vm);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Guid>> Create([FromBody] CreateClientDto createClientDto) 
+        [HttpPost("/CreateClient")]
+        public async Task<ActionResult<Guid>> Create([FromBody] CreateClientDto createClientDto)
         {
             var command = _mapper.Map<CreateClientCommand>(createClientDto);
             command.UserId = UserId;
@@ -55,7 +54,7 @@ namespace Finance.WebApi.Controllers
             return Ok(clientId);
         }
 
-        [HttpPut]
+        [HttpPut("/UpdateClient")]
         public async Task<ActionResult<Guid>> Update([FromBody] UpdateClientDto updateClientDto)
         {
             var command = _mapper.Map<UpdateClientCommand>(updateClientDto);
@@ -64,11 +63,11 @@ namespace Finance.WebApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}/DeleteClient")]
         public async Task<ActionResult<Guid>> Delete(Guid id)
         {
-            var command = new DeleteClientCommand 
-            { 
+            var command = new DeleteClientCommand
+            {
                 UserId = UserId,
                 Id = id
             };

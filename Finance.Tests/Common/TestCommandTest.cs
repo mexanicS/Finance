@@ -17,8 +17,8 @@ namespace Finance.Tests.Common
         protected readonly IMediator Mediator;
         public TestCommandBase()
         {
-            Context = FinanceContextFactory.Create();
-
+            var contextFactory = new FinanceContextFactory();
+            Context = contextFactory.CreateContext();
             Mediator = Substitute.For<IMediator>();
         }
 

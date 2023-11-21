@@ -19,7 +19,7 @@ namespace Finance.WebApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{clientId}")]
+        [HttpGet("{clientId}/getFinancialAccountByClient")]
         public async Task<ActionResult<FinancialAccount>> GetFinancialAccountByClient(Guid clientId)
         {
             var query = new GetFiancialAccountByClientQuery()
@@ -31,6 +31,6 @@ namespace Finance.WebApi.Controllers
             return Ok(vm);
         }
 
-  
+
     }
 }

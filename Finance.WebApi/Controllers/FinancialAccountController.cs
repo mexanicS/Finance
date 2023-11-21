@@ -30,5 +30,7 @@ namespace Finance.WebApi.Controllers
             var vm = await Mediator.Send(query);
             return Ok(vm);
         }
+
+  
     }
 }

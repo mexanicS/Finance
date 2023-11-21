@@ -22,6 +22,7 @@ namespace Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount
                 Id = Guid.NewGuid(),
                 CreateDate = DateTime.UtcNow,
                 Title = request.Title,
+                ClientId = request.ClientId,
             };
 
             await _dbContext.FinancialAccounts.AddAsync(financialAccount, cancellationToken);

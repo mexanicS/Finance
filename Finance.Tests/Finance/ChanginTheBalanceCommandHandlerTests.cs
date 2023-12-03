@@ -13,16 +13,12 @@ namespace Finance.Tests.Finance
 {
     public class ChanginTheBalanceCommandHandlerTests : UnitOfWork
     {
-        private object lockObject = new object();
-        private int completedThreads = 0;
-        private int totalThreads;
 
-        int maxThreads = 10;
+        readonly int maxThreads = 10;
         [Fact]
         public async void CreateClientCommandHandler_Success()
         {
             //Arrange
-            int maxDegreeOfParallelism = 10;
 
             //регистрация 50 пользователей
             var registeredUsers = await RegisterUsers(50);
@@ -46,11 +42,11 @@ namespace Finance.Tests.Finance
                 .CreateLogger();
 
             
-            List<Thread> threads = new List<Thread>();
+            List<Thread> threads = new();
 
             for (int i = 0; i < maxThreads; i++)
             {
-                Thread thread = new Thread(() => UpdateAccountBalance(clients));
+                Thread thread = new(() => UpdateAccountBalance(clients));
                 threads.Add(thread);
                 thread.Start();
                 //При отсутствии задержки пополнение и списание происходит максимально одновременно но не верно
@@ -62,7 +58,7 @@ namespace Finance.Tests.Finance
 
             foreach (Thread thread in threads)
             {
-                thread.Join(); // Ожидаем завершения всех потоков
+                thread.Join();
             }
 
             var accountsNew = _context.FinancialAccounts.ToList();

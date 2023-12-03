@@ -42,8 +42,6 @@ namespace Finance.Tests.Common
 
             return client.Id;
         }
-
-        // Реализация методов для доступа к сущностям базы данных
     }
 
     public class UnitOfWork : IDisposable

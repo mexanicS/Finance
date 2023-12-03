@@ -1,37 +1,34 @@
-﻿using Finance.Application;
-using Finance.Application.Clinents.Commands.CreateClient;
+﻿using Finance.Application.Clinents.Commands.CreateClient;
 using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient;
 using Finance.Application.FinancialAccountBalance.Commands.DeductMoneyToBalanceByClient;
 using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
 using Finance.Domain;
-using Finance.Persistence;
 using Finance.Tests.Common;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Serilog;
+using System.Collections.Concurrent;
 using Xunit;
 
 namespace Finance.Tests.Finance
 {
-    public class ChanginTheBalanceCommandHandlerTests : TestCommandBase
+    public class ChanginTheBalanceCommandHandlerTests : UnitOfWork
     {
+        private object lockObject = new object();
+        private int completedThreads = 0;
+        private int totalThreads;
+
+        int maxThreads = 10;
         [Fact]
-        public async Task CreateClientCommandHandler_Success()
+        public async void CreateClientCommandHandler_Success()
         {
             //Arrange
             int maxDegreeOfParallelism = 10;
 
             //регистрация 50 пользователей
             var registeredUsers = await RegisterUsers(50);
-            var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(Context);
-            var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(Context);
-            var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(Context);
-
+            var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(_context);
+            
+            
             //Act
             foreach (var registeredUser in registeredUsers)
             {
@@ -40,39 +37,89 @@ namespace Finance.Tests.Finance
                         CancellationToken.None);
             }
 
-            var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
+            var clients = _context.Clients.ToList();
+            var accounts = _context.FinancialAccounts.ToList();
 
-            var tasks = registeredUsers.Select(async client =>
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(@"D:\logging\log.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            
+            List<Thread> threads = new List<Thread>();
+
+            for (int i = 0; i < maxThreads; i++)
             {
-                await semaphore.WaitAsync();
-                try
-                {
-                    await handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
-                    { Balance = 15, ClientId = client }, CancellationToken.None);
+                Thread thread = new Thread(() => UpdateAccountBalance(clients));
+                threads.Add(thread);
+                thread.Start();
+                //При отсутствии задержки пополнение и списание происходит максимально одновременно но не верно
+                //но есть подозрения как будто данные не успевают сохранятся
+                //тк в логе все операции происходят а в базе значения другие
+                Thread.Sleep(200);
 
-                    await handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
-                    { Balance = 7, ClientId = client }, CancellationToken.None);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }).ToArray();
+            }
 
-            await Task.WhenAll(tasks);
+            foreach (Thread thread in threads)
+            {
+                thread.Join(); // Ожидаем завершения всех потоков
+            }
 
-            //Assert
+            var accountsNew = _context.FinancialAccounts.ToList();
+
+            foreach (var acc in accountsNew)
+            {
+                Log.Information($"На акк: {acc.ClientId}. денег стока {acc.Balance} ");
+            }
+
+            Log.CloseAndFlush();
+
             foreach (var clientId in registeredUsers)
             {
                 Assert.NotNull(
-                await Context.FinancialAccounts.FirstOrDefaultAsync(financialAccounts =>
-                    financialAccounts.ClientId == clientId && financialAccounts.Balance == 8));
+                await _context.FinancialAccounts.FirstOrDefaultAsync(financialAccounts =>
+                    financialAccounts.ClientId == clientId && financialAccounts.Balance == 50));
             }
         }
 
+        private void UpdateAccountBalance(List<Client> clients)
+        {
+            var lockObjectForAdd = new object();
+            var lockObjectForDeduct = new object();
+            var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(_context);
+            var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(_context);
+
+            var partitioner = Partitioner.Create(clients, EnumerablePartitionerOptions.NoBuffering);
+            Parallel.ForEach(partitioner, client =>
+            {
+                lock (lockObjectForAdd)
+                {
+                    int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+
+                    handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
+                    { Balance = 10, ClientId = client.Id }, CancellationToken.None);
+                    
+                    Log.Information($"В потоке: {currentThreadId}. На акк {client.Id} добавлено 10 единиц");
+                }
+            });
+            Parallel.ForEach(partitioner, client =>
+            {
+                lock (lockObjectForDeduct)
+                {
+                    int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+
+                    handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
+                    { Balance = 5, ClientId = client.Id }, CancellationToken.None);
+
+                    Log.Information($"В потоке: {currentThreadId}. С акк {client.Id} снято 5 единиц");
+                }
+            });
+        }
+
+        
         public async Task<List<Guid>> RegisterUsers(int quantity)
         {
-            var handler = new CreateClientCommandsHandler(Context, Mediator);
+            var handler = new CreateClientCommandsHandler(_context, Mediator);
             List<Guid> listClientsId = new();
             for (int i = 0; i < quantity; i++)
             {

@@ -13,32 +13,24 @@ namespace Finance.Tests.Common
 {
     public class FinanceContextFactory
     {
+        private FinanceDbContext _context;
+
         public static Guid UserAId = Guid.NewGuid();
         public static Guid UserBId = Guid.NewGuid();
 
         public FinanceDbContext CreateContext()
         {
-            var options = new DbContextOptionsBuilder<FinanceDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            if (_context == null)
+            {
+                var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                    .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                    .Options;
 
-            var context = new FinanceDbContext(options);
-            context.Database.EnsureCreated();
-            context.Clients.AddRange(
-                new Client
-                {
-                    AddedDate = DateTime.Today,
-                    Description = "Details1",
-                    FirstName = "yertert",
-                    Id = Guid.Parse("A6BB65BB-5AC2-4AFA-8A28-2616F675B825"),
-                    LastName = "Title1",
-                    UserId = UserAId,
-                    MiddleName = "asd",
-                    DateOfBirth = null
-                });
+                _context = new FinanceDbContext(options);
+                _context.Database.EnsureCreated();
+            }
 
-            context.SaveChanges();
-            return new FinanceDbContext(options);
+            return _context;
         }
 
         public static void Destroy(FinanceDbContext context)

@@ -15,9 +15,11 @@ namespace Finance.Tests.Common
     {
         protected readonly FinanceDbContext Context;
         protected readonly IMediator Mediator;
+        protected readonly FinanceContextFactory Fact;
         public TestCommandBase()
         {
             var contextFactory = new FinanceContextFactory();
+            Fact = contextFactory;
             Context = contextFactory.CreateContext();
             Mediator = Substitute.For<IMediator>();
         }

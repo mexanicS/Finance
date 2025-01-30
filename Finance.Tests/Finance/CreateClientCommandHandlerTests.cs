@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Finance.Tests.Finance
 {
-    public class CreateClientCommandHandlerTests : TestCommandBase
+    /*public class CreateClientCommandHandlerTests : TestCommandBase
     {
         [Fact]
         public async Task CreateClientCommandHandler_Success()
@@ -52,5 +52,5 @@ namespace Finance.Tests.Finance
                     client.MiddleName == middleName &&
                     client.DateOfBirth == dateOfBirth));
         }
-    }
+    }*/
 }

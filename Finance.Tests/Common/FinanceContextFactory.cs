@@ -13,30 +13,18 @@ namespace Finance.Tests.Common
 {
     public class FinanceContextFactory
     {
-        private FinanceDbContext _context;
-
         public static Guid UserAId = Guid.NewGuid();
-        public static Guid UserBId = Guid.NewGuid();
 
-        public FinanceDbContext CreateContext()
+        private readonly DbContextOptions<FinanceDbContext> _options;
+
+        public FinanceContextFactory(DbContextOptions<FinanceDbContext> options)
         {
-            if (_context == null)
-            {
-                var options = new DbContextOptionsBuilder<FinanceDbContext>()
-                    .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                    .Options;
-
-                _context = new FinanceDbContext(options);
-                _context.Database.EnsureCreated();
-            }
-
-            return _context;
+            _options = options;
         }
 
-        public static void Destroy(FinanceDbContext context)
+        public FinanceDbContext CreateDbContext()
         {
-            context.Database.EnsureDeleted();
-            context.Dispose();
+            return new FinanceDbContext(_options);
         }
     }
 }

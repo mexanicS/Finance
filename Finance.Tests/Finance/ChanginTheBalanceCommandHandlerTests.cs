@@ -7,6 +7,9 @@ using Finance.Tests.Common;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Collections.Concurrent;
+
+using Finance.Persistence;
+
 using Xunit;
 
 namespace Finance.Tests.Finance
@@ -15,6 +18,8 @@ namespace Finance.Tests.Finance
     {
 
         readonly int maxThreads = 10;
+        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        
         [Fact]
         public async void CreateClientCommandHandler_Success()
         {
@@ -24,6 +29,10 @@ namespace Finance.Tests.Finance
             var registeredUsers = await RegisterUsers(50);
             var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(_context);
             
+            var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                .Options;
+
+            var contextFactory = new FinanceContextFactory(options);
             
             //Act
             foreach (var registeredUser in registeredUsers)
@@ -38,29 +47,38 @@ namespace Finance.Tests.Finance
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(@"D:\logging\log.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(@"E:\workingZone\logging\log.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             
-            List<Thread> threads = new();
+            using var semaphore = new SemaphoreSlim(10);
 
-            for (int i = 0; i < maxThreads; i++)
+            List<Task> tasks = new List<Task>();
+
+            foreach (var clientId in clients)
             {
-                Thread thread = new(() => UpdateAccountBalance(clients));
-                threads.Add(thread);
-                thread.Start();
-                //При отсутствии задержки пополнение и списание происходит максимально одновременно но не верно
-                //но есть подозрения как будто данные не успевают сохранятся
-                //тк в логе все операции происходят а в базе значения другие
-                Thread.Sleep(200);
+                for (int i = 0; i < 10; i++)
+                {
+                    // Запускаем задачу
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        await semaphore.WaitAsync();
 
+                        try
+                        {
+                            await AddAndRemoveMoneyToAccount(contextFactory, clientId.Id);
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    }));
+                }
             }
 
-            foreach (Thread thread in threads)
-            {
-                thread.Join();
-            }
-
+            // Ждем завершения всех задач
+            await Task.WhenAll(tasks);  
+            
             var accountsNew = _context.FinancialAccounts.ToList();
 
             foreach (var acc in accountsNew)
@@ -85,31 +103,24 @@ namespace Finance.Tests.Finance
             var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(_context);
             var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(_context);
 
-            var partitioner = Partitioner.Create(clients, EnumerablePartitionerOptions.NoBuffering);
-            Parallel.ForEach(partitioner, client =>
-            {
-                lock (lockObjectForAdd)
-                {
-                    int currentThreadId = Thread.CurrentThread.ManagedThreadId;
+            
+        }
 
-                    handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
-                    { Balance = 10, ClientId = client.Id }, CancellationToken.None);
-                    
-                    Log.Information($"В потоке: {currentThreadId}. На акк {client.Id} добавлено 10 единиц");
-                }
-            });
-            Parallel.ForEach(partitioner, client =>
-            {
-                lock (lockObjectForDeduct)
-                {
-                    int currentThreadId = Thread.CurrentThread.ManagedThreadId;
-
-                    handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
-                    { Balance = 5, ClientId = client.Id }, CancellationToken.None);
-
-                    Log.Information($"В потоке: {currentThreadId}. С акк {client.Id} снято 5 единиц");
-                }
-            });
+        private async Task AddAndRemoveMoneyToAccount(FinanceContextFactory contextFactory, Guid clientId)
+        {
+            var context = contextFactory.CreateDbContext();
+            
+            var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(context);
+            var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(context);
+            
+            
+            await handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
+                { Balance = 5, ClientId = clientId }, CancellationToken.None);
+            
+            await handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
+                { Balance = 10, ClientId = clientId }, CancellationToken.None);
+            
+            
         }
 
         

@@ -1,7 +1,4 @@
-﻿using Finance.WebApi.MiddleWare;
-using Microsoft.AspNetCore.Builder;
-
-namespace Notes.WebApi.Middleware
+﻿namespace Finance.WebApi.MiddleWare
 {
     public static class CustomExceptionHandlerMiddlewareExtensions
     {

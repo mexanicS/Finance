@@ -1,11 +1,6 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient
+namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinancialAccount
 {
     public class AddMoneyToFinancialAccountCommand : IRequest<Unit>
     {

@@ -7,9 +7,9 @@ using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
 using Finance.Application.Interfaces;
 using Finance.Domain;
 using Finance.Persistence;
+using Finance.WebApi.MiddleWare;
 using Finance.WebApi.Models;
 using MediatR;
-using Notes.WebApi.Middleware;
 
 namespace Finance.WebApi
 {

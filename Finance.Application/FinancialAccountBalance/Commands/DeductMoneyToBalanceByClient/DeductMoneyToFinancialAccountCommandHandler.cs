@@ -1,5 +1,4 @@
 ﻿using Finance.Application.Common.Exceptions;
-using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient;
 using Finance.Application.Interfaces;
 using Finance.Domain;
 using MediatR;

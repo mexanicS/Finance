@@ -1,12 +1,7 @@
 ﻿using Finance.Domain;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Finance.Application.FinancialAccounts.Queries.GetFiancialAccountByClient
+namespace Finance.Application.FinancialAccountBalance.Queries.GetBalanceByClient
 {
     public class GetBalanceByClientQuery : IRequest<FinancialAccount>
     {

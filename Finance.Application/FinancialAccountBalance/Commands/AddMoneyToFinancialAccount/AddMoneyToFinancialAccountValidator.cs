@@ -1,5 +1,4 @@
 ﻿using Finance.Application.Clinents.Commands.CreateClient;
-using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient;
 using FluentValidation;
 using System;
 using System.Collections.Generic;

@@ -1,19 +1,12 @@
-﻿using Finance.Application.Common.Exceptions;
-using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
+﻿using System.Collections.Concurrent;
+using Finance.Application.Common.Exceptions;
 using Finance.Application.Interfaces;
 using Finance.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Serilog;
 
-namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient
+namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinancialAccount
 {
 
     public class AddMoneyToFinancialAccountCommandHandler : IRequestHandler<AddMoneyToFinancialAccountCommand, Unit>

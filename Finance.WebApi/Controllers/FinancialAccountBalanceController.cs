@@ -3,8 +3,9 @@ using Finance.WebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Finance.Application.FinancialAccounts.Queries.GetFiancialAccountByClient;
 using AutoMapper;
-using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient;
+using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinancialAccount;
 using Finance.Application.FinancialAccountBalance.Commands.DeductMoneyToBalanceByClient;
+using Finance.Application.FinancialAccountBalance.Queries.GetBalanceByClient;
 
 namespace Finance.WebApi.Controllers
 {

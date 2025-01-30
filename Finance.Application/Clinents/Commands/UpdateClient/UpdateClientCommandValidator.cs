@@ -1,12 +1,7 @@
-﻿using FluentValidation;
-using FluentValidation.Validators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Finance.Application.Clinents.Commands.CreateClient;
+using FluentValidation;
 
-namespace Finance.Application.Clinents.Commands.CreateClient
+namespace Finance.Application.Clinents.Commands.UpdateClient
 {
     public class UpdateClientCommandValidator : AbstractValidator<CreateClientCommand>
     {

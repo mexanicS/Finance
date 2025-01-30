@@ -1,5 +1,4 @@
 ﻿using Finance.Application.Clinents.Commands.CreateClient;
-using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToBalanceByClient;
 using Finance.Application.FinancialAccountBalance.Commands.DeductMoneyToBalanceByClient;
 using Finance.Application.FinancialAccounts.Commands.CreateFinancialAccount;
 using Finance.Domain;
@@ -7,7 +6,7 @@ using Finance.Tests.Common;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Collections.Concurrent;
-
+using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinancialAccount;
 using Finance.Persistence;
 
 using Xunit;
@@ -30,6 +29,7 @@ namespace Finance.Tests.Finance
             var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(_context);
             
             var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
             var contextFactory = new FinanceContextFactory(options);
@@ -119,8 +119,6 @@ namespace Finance.Tests.Finance
             
             await handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
                 { Balance = 10, ClientId = clientId }, CancellationToken.None);
-            
-            
         }
 
         

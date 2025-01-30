@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using PeoplesCities.Application.Common.Behaviors;
 using System;
 using System.Collections.Generic;
 using System.Linq;

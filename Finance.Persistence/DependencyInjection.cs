@@ -16,7 +16,7 @@ namespace Finance.Persistence
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionString = configuration["DbConnection"];
-            services.AddDbContextPool<FinanceDbContext>(options =>
+            services.AddDbContext<FinanceDbContext>(options =>
             {
                 options.UseSqlite(connectionString);
             });

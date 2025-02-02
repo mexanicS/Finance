@@ -21,12 +21,12 @@ namespace Finance.WebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAutoMapper(config => {
+            /*services.AddAutoMapper(config => {
                 config.AddProfile(new AssemblyMappingProfile(Assembly.GetExecutingAssembly()));
                 config.AddProfile(new AssemblyMappingProfile(typeof(FinanceDbContext).Assembly));
                 config.CreateMap<Client, ClientLookupDto>();
                 config.CreateMap<CreateClientDto, CreateClientCommand>();
-            });
+            });*/
 
             services.AddApplication();
             services.AddPersistence(Configuration);

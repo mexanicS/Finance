@@ -24,6 +24,8 @@ namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinanci
             var semaphore = _semaphores.GetOrAdd(request.ClientId, _ => new SemaphoreSlim(1, 1));
             await semaphore.WaitAsync(cancellationToken);
             
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
             try
             {
                 var financialAccount =
@@ -39,6 +41,8 @@ namespace Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinanci
                 financialAccount.UpdateDate = DateTime.Now;
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                
                 Log.Information($"В потоке: {Environment.CurrentManagedThreadId}. На акк {request.ClientId} добавлено 10 единиц");
             }
             finally

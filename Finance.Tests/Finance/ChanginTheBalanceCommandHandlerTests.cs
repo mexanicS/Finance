@@ -8,7 +8,8 @@ using Serilog;
 using System.Collections.Concurrent;
 using Finance.Application.FinancialAccountBalance.Commands.AddMoneyToFinancialAccount;
 using Finance.Persistence;
-
+using MediatR;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace Finance.Tests.Finance
@@ -17,22 +18,20 @@ namespace Finance.Tests.Finance
     {
 
         readonly int maxThreads = 10;
-        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        //private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         
         [Fact]
         public async void CreateClientCommandHandler_Success()
         {
+            var connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
             //Arrange
-
-            //регистрация 50 пользователей
-            var registeredUsers = await RegisterUsers(50);
-            var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(_context);
             
-            var options = new DbContextOptionsBuilder<FinanceDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            var contextFactory = new FinanceContextFactory(options);
+            var contextFactory = new FinanceContextFactory(connection);
+            var _context = contextFactory.CreateDbContext();
+            //регистрация 50 пользователей
+            var registeredUsers = await RegisterUsers(50, _context);
+            var handlerAddFinancialAccount = new CreateFinancialAccountCommandsHandler(_context);
             
             //Act
             foreach (var registeredUser in registeredUsers)
@@ -42,43 +41,27 @@ namespace Finance.Tests.Finance
                         CancellationToken.None);
             }
 
-            var clients = _context.Clients.ToList();
-            var accounts = _context.FinancialAccounts.ToList();
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(@"E:\workingZone\logging\log.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(@"F:\Projects\logger\log.txt", rollingInterval: RollingInterval.Minute)
                 .CreateLogger();
 
-            
-            using var semaphore = new SemaphoreSlim(10);
+            var tasks = new List<Task>();
 
-            List<Task> tasks = new List<Task>();
-
-            foreach (var clientId in clients)
+            for (var i = 0; i < 10; i++)
             {
-                for (int i = 0; i < 10; i++)
+                tasks.Add(Task.Run(async () =>
                 {
-                    // Запускаем задачу
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        await semaphore.WaitAsync();
-
-                        try
-                        {
-                            await AddAndRemoveMoneyToAccount(contextFactory, clientId.Id);
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    }));
-                }
+                    // Запускаем оба метода параллельно
+                    await Task.WhenAll(
+                        AddMoneyToAccount(contextFactory),
+                        DeductMoneyToAccount(contextFactory)
+                    );
+                }));
             }
 
-            // Ждем завершения всех задач
-            await Task.WhenAll(tasks);  
-            
+            await Task.WhenAll(tasks);
+
             var accountsNew = _context.FinancialAccounts.ToList();
 
             foreach (var acc in accountsNew)
@@ -96,35 +79,61 @@ namespace Finance.Tests.Finance
             }
         }
 
-        private void UpdateAccountBalance(List<Client> clients)
-        {
-            var lockObjectForAdd = new object();
-            var lockObjectForDeduct = new object();
-            var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(_context);
-            var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(_context);
+        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-            
-        }
-
-        private async Task AddAndRemoveMoneyToAccount(FinanceContextFactory contextFactory, Guid clientId)
+        private async Task AddMoneyToAccount(FinanceContextFactory contextFactory)
         {
-            var context = contextFactory.CreateDbContext();
-            
+            await using var context = contextFactory.CreateDbContext();
             var handlerAddMoney = new AddMoneyToFinancialAccountCommandHandler(context);
-            var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(context);
-            
-            
-            await handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
-                { Balance = 5, ClientId = clientId }, CancellationToken.None);
-            
-            await handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
-                { Balance = 10, ClientId = clientId }, CancellationToken.None);
+
+            var clientIds = await context.Clients.Select(x => x.Id).ToListAsync();
+
+            foreach (var clientId in clientIds)
+            {
+                await _semaphore.WaitAsync();
+                try
+                {
+                    await handlerAddMoney.Handle(new AddMoneyToFinancialAccountCommand
+                    {
+                        Balance = 10,
+                        ClientId = clientId
+                    }, CancellationToken.None);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
         }
 
-        
-        public async Task<List<Guid>> RegisterUsers(int quantity)
+        private async Task DeductMoneyToAccount(FinanceContextFactory contextFactory)
         {
-            var handler = new CreateClientCommandsHandler(_context, Mediator);
+            await using var context = contextFactory.CreateDbContext();
+            var handlerDeductMoney = new DeductMoneyToFinancialAccountCommandHandler(context);
+
+            var clientIds = await context.Clients.Select(x => x.Id).ToListAsync();
+
+            foreach (var clientId in clientIds)
+            {
+                await _semaphore.WaitAsync();
+                try
+                {
+                    await handlerDeductMoney.Handle(new DeductMoneyToFinancialAccountCommand
+                    {
+                        Balance = 5,
+                        ClientId = clientId
+                    }, CancellationToken.None);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+        }
+        
+        public async Task<List<Guid>> RegisterUsers(int quantity, FinanceDbContext context)
+        {
+            var handler = new CreateClientCommandsHandler(context, Mediator);
             List<Guid> listClientsId = new();
             for (int i = 0; i < quantity; i++)
             {

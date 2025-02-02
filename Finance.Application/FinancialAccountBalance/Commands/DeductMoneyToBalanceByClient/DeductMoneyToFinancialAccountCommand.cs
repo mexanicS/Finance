@@ -10,6 +10,7 @@ namespace Finance.Application.FinancialAccountBalance.Commands.DeductMoneyToBala
     public class DeductMoneyToFinancialAccountCommand : IRequest<Unit>
     {
         public Guid ClientId { get; set; }
+        
         public decimal? Balance { get; set; }
     }
 }

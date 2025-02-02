@@ -8,23 +8,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 
 namespace Finance.Tests.Common
 {
     public class FinanceContextFactory
     {
-        public static Guid UserAId = Guid.NewGuid();
-
-        private readonly DbContextOptions<FinanceDbContext> _options;
-
-        public FinanceContextFactory(DbContextOptions<FinanceDbContext> options)
+        private readonly SqliteConnection _connection;
+        public static Guid UserAId { get; set; } = Guid.NewGuid();
+        public FinanceContextFactory(SqliteConnection connection)
         {
-            _options = options;
+            _connection = connection;
         }
 
         public FinanceDbContext CreateDbContext()
         {
-            return new FinanceDbContext(_options);
+            var options = new DbContextOptionsBuilder<FinanceDbContext>()
+                .UseSqlite(_connection) // Используем переданное подключение
+                .Options;
+
+            var context = new FinanceDbContext(options);
+            context.Database.EnsureCreated(); // Создаем базу данных, если она еще не создана
+
+            return context;
         }
     }
 }

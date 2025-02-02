@@ -4,9 +4,11 @@ using Finance.Persistence.EntityTypeConfiguration;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Finance.Persistence
 {
@@ -25,6 +27,13 @@ namespace Finance.Persistence
             modelBuilder.ApplyConfiguration(new ClientConfiguration());
 
             base.OnModelCreating(modelBuilder);
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            //optionsBuilder.UseNpgsql(_connectionString);
+            optionsBuilder.EnableSensitiveDataLogging();
+            
+            base.OnConfiguring(optionsBuilder);
         }
     }
 }

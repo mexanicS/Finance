@@ -1,10 +1,12 @@
 ﻿using Finance.Domain;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Finance.Application.Interfaces
 {
@@ -15,5 +17,7 @@ namespace Finance.Application.Interfaces
         DbSet<Client> Clients { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        
+        DatabaseFacade Database { get; }
     }
 }
